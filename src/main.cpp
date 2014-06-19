@@ -112,5 +112,112 @@ This program comes with ABSOLUTELY NO WARRANTY.\n\
   }
   */
   
+  
+  //=====================================================================
+  // Load particle files
+  
+  BOOST_FOREACH(fs::path f, inputFolders) {
+    std::vector<Eigen::Vector3d> pos;
+    std::vector<Eigen::Vector3d> vel;
+    std::vector<double> ids;
+    
+    {
+    // Positions  =======================================================
+      fs::path curFilePos = f.string() + "/lagrangian/kinematicCloud/positions.gz";
+      std::ifstream file(curFilePos.string(), std::ios_base::in | std::ios_base::binary);
+      
+      try {
+        boost::iostreams::filtering_istream in;
+        in.push(boost::iostreams::gzip_decompressor());
+        in.push(file);
+        unsigned int i = 0;
+        unsigned int numP = 0;
+        for(std::string str; std::getline(in, str); )
+        {   
+          if (i == 17) {
+            numP = std::stoul (str);
+          } else if (i-19 < numP and i > 17) {
+            //std::cout << "Processed line " << str << '\n';
+            
+            std::vector<std::string> tokens;
+            std::istringstream iss(str);
+            copy(std::istream_iterator<std::string>(iss),
+                 std::istream_iterator<std::string>(),
+                 std::back_inserter<std::vector<std::string> >(tokens));
+            
+            const double x = std::stod(tokens[0].erase(0,1));
+            const double y = std::stod(tokens[1]);
+            const double z = std::stod(tokens[2].erase(tokens[2].size(),1));
+            pos.push_back(Eigen::Vector3d(x,y,z));
+          }
+          i++;
+        }
+      }
+      catch(const boost::iostreams::gzip_error& e) {
+           std::cout << e.what() << '\n';
+      }
+    }
+    {
+      // Velocities  =====================================================
+      fs::path curFileVel = f.string() + "/lagrangian/kinematicCloud/U.gz";
+      std::ifstream file(curFileVel.string(), std::ios_base::in | std::ios_base::binary);
+      
+      try {
+        boost::iostreams::filtering_istream in;
+        in.push(boost::iostreams::gzip_decompressor());
+        in.push(file);
+        unsigned int i = 0;
+        unsigned int numP = 0;
+        for(std::string str; std::getline(in, str); )
+        {   
+          if (i == 18) {
+            numP = std::stoul (str);
+          } else if (i-20 < numP and i > 18) {
+            std::vector<std::string> tokens;
+            std::istringstream iss(str);
+            copy(std::istream_iterator<std::string>(iss),
+                 std::istream_iterator<std::string>(),
+                 std::back_inserter<std::vector<std::string> >(tokens));
+            
+            const double x = std::stod(tokens[0].erase(0,1));
+            const double y = std::stod(tokens[1]);
+            const double z = std::stod(tokens[2].erase(tokens[2].size(),1));
+            vel.push_back(Eigen::Vector3d(x,y,z));
+          }
+          i++;
+        }
+      }
+      catch(const boost::iostreams::gzip_error& e) {
+           std::cout << e.what() << '\n';
+      }
+    }
+    {
+      // Ids  =====================================================
+      fs::path curFileIDs = f.string() + "/lagrangian/kinematicCloud/origId.gz";
+      std::ifstream file(curFileIDs.string(), std::ios_base::in | std::ios_base::binary);
+      
+      try {
+        boost::iostreams::filtering_istream in;
+        in.push(boost::iostreams::gzip_decompressor());
+        in.push(file);
+        unsigned int i = 0;
+        unsigned int numP = 0;
+        for(std::string str; std::getline(in, str); )
+        {   
+          if (i == 18) {
+            numP = std::stoul (str);
+          } else if (i-20 < numP and i > 18) {
+            ids.push_back(std::stod(str));
+          }
+          i++;
+        }
+      }
+      catch(const boost::iostreams::gzip_error& e) {
+           std::cout << e.what() << '\n';
+      }
+    }
+    
+    std::cout<<" Files in folder " << f.string() << " " <<pos.size() << " " << vel.size()  << " " << ids.size()<<std::endl;
+  }
   return 0;
 }

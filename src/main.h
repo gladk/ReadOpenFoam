@@ -26,7 +26,10 @@
 #include <boost/regex.hpp>
 #include <boost/foreach.hpp>
 #include <boost/version.hpp>
+#include <boost/iostreams/filtering_stream.hpp>
+#include <boost/iostreams/filter/gzip.hpp>
 
+#include <fstream>
 #include <iostream>
 #include <algorithm>
 #include <iterator>
