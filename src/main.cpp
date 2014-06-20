@@ -217,7 +217,14 @@ This program comes with ABSOLUTELY NO WARRANTY.\n\
       }
     }
     
-    std::cout<<" Files in folder " << f.string() << " " <<pos.size() << " " << vel.size()  << " " << ids.size()<<std::endl;
+    std::cout<<" Files in folder " << f.filename() << " " <<pos.size() << " " << vel.size()  << " " << ids.size()<<std::endl;
+    std::vector<particle> particles;
+    for (unsigned int i=0; i<pos.size(); i++) {
+      const particle tmpPart=particle(ids[i], pos[i], vel[i]);
+      particles.push_back(tmpPart);
+    }
+    std::cout<<" Particles size " << particles.size()<<std::endl;
+    
   }
   return 0;
 }
