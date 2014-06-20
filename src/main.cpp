@@ -112,10 +112,18 @@ This program comes with ABSOLUTELY NO WARRANTY.\n\
   }
   */
   
+  //=====================================================
+  if (not fs::is_directory(outputFolder)) {
+    std::cout<<"The directory " << outputFolder<< " does not exists. Creating."<<std::endl;
+    if (fs::create_directory(outputFolder)) {
+      std::cout<<"The directory " << outputFolder<< " created."<<std::endl;
+    }
+  }
   
   //=====================================================================
   // Load particle files
   
+  unsigned int fileId = 0;
   BOOST_FOREACH(fs::path f, inputFolders) {
     std::vector<Eigen::Vector3d> pos;
     std::vector<Eigen::Vector3d> vel;
@@ -217,13 +225,60 @@ This program comes with ABSOLUTELY NO WARRANTY.\n\
       }
     }
     
-    std::cout<<" Files in folder " << f.filename() << " " <<pos.size() << " " << vel.size()  << " " << ids.size()<<std::endl;
+    std::cout<<" Files in folder " << f.filename() << " " <<pos.size() << " " << vel.size()  << " " << ids.size()<<"; ";
     std::vector<particle> particles;
     for (unsigned int i=0; i<pos.size(); i++) {
       const particle tmpPart=particle(ids[i], pos[i], vel[i]);
       particles.push_back(tmpPart);
     }
-    std::cout<<" Particles size " << particles.size()<<std::endl;
+    std::cout<<"Particle size " << particles.size()<<std::endl;
+    
+    
+    // CreatVTK  =====================================================
+    std::string _fileNameVTU = outputFolder + "/output_" + std::to_string(fileId) + ".vtu";
+    vtkSmartPointer<vtkPoints>    spheresPos    = vtkSmartPointer<vtkPoints>::New();
+    vtkSmartPointer<vtkCellArray> spheresCells  = vtkSmartPointer<vtkCellArray>::New();
+    
+    vtkSmartPointer<vtkIntArray> spheresId = vtkSmartPointer<vtkIntArray>::New();
+    spheresId->SetNumberOfComponents(1);
+    spheresId->SetName("p_Id");
+    
+    vtkSmartPointer<vtkDoubleArray> spheresVelL = vtkSmartPointer<vtkDoubleArray>::New();
+    spheresVelL->SetNumberOfComponents(3);
+    spheresVelL->SetName("p_Velocity");
+    
+    BOOST_FOREACH(particle p, particles) {
+      vtkIdType pid[1];
+      pid[0] = spheresPos->InsertNextPoint(p.c()[0], p.c()[1], p.c()[2]);
+      
+      spheresId->InsertNextValue(p.id());
+      
+      double vv[3] = {p.v()[0], p.v()[1], p.v()[2]};
+      spheresVelL->InsertNextTupleValue(vv);
+      
+      spheresCells->InsertNextCell(1,pid);
+    }
+    
+    vtkSmartPointer<vtkUnstructuredGrid> spheresUg = vtkSmartPointer<vtkUnstructuredGrid>::New();
+    
+    spheresUg->SetPoints(spheresPos);
+    spheresUg->SetCells(VTK_VERTEX, spheresCells);
+    spheresUg->GetPointData()->AddArray(spheresId);
+    spheresUg->GetPointData()->AddArray(spheresVelL);
+    
+    vtkSmartPointer<vtkXMLUnstructuredGridWriter> writer = vtkSmartPointer<vtkXMLUnstructuredGridWriter>::New();
+    writer->SetDataModeToAscii();
+    
+    #ifdef VTK6
+      writer->SetInputData(spheresUg);
+    #else
+      writer->SetInput(spheresUg);
+    #endif
+    
+    writer->SetFileName(_fileNameVTU.c_str());
+    writer->Write();
+    
+    fileId++;
     
   }
   return 0;

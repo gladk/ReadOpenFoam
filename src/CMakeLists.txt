@@ -1,5 +1,5 @@
 #===========================================================
-ADD_EXECUTABLE(readopenfoam main.cpp particle.cpp)
+ADD_EXECUTABLE(readopenfoam main.cpp)
   
 TARGET_LINK_LIBRARIES(readopenfoam ${Boost_LIBRARIES})
 INSTALL(TARGETS readopenfoam DESTINATION ${CMAKE_INSTALL_BINDIR})

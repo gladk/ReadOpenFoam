@@ -37,3 +37,16 @@
 #include <Eigen/Dense>
 #include "particle.h"
 
+#include <vtkCellArray.h>
+#include <vtkDoubleArray.h>
+#include <vtkIntArray.h>
+#include <vtkPoints.h>
+#include <vtkPointData.h>
+#include <vtkCellData.h>
+#include <vtkSmartPointer.h>
+#include <vtkUnstructuredGrid.h>
+#include <vtkPolyData.h>
+#include <vtkXMLUnstructuredGridWriter.h>
+#include <vtkXMLPolyDataWriter.h>
+#include <vtkZLibDataCompressor.h>
+#include <vtkLine.h>

@@ -33,8 +33,7 @@ class particle {
     unsigned int _snapshot;       // Snapshot
     
   public:
-    particle (unsigned long long id, Eigen::Vector3d c, Eigen::Vector3d v);
-    
+    particle (unsigned long long id, Eigen::Vector3d c, Eigen::Vector3d v) { _id = id; _c = c; _v = v;}
     unsigned long long id() const {return _id;};
     Eigen::Vector3d c() const {return _c;}
     Eigen::Vector3d v() const {return _v;}
